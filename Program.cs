@@ -16,6 +16,7 @@ namespace Chess
 
 			Console.WriteLine(Coords.ToChessNotation(3, 3));
 
+			Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
 		}
 	}
 
@@ -50,25 +51,31 @@ namespace Chess
 		H  // 8
 	}
 
-	public struct Coords
+	enum Owner
+    {
+		White,
+		Black
+    }
+
+	public class Coords
     {
 		public int X { get; }
 		public int Y { get; }
 
-		public Coords(int X, int Y)
+		public Coords(int X = 0, int Y = 0)
         {
 			this.X = X;
 			this.Y = Y;
         }
 
-		public override string ToString() => $"{X}, {Y}";
+		public override string ToString() => $"{X}, {Y}"; // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct
 		public static string ToChessNotation(int x, int y)
         {
 			string res;
 
 			switch (x)
             {
-				case (int) ChessNotation.A: // https://stackoverflow.com/questions/943398/get-int-value-from-enum-in-c-sharp
+				case (int)ChessNotation.A: // https://stackoverflow.com/questions/943398/get-int-value-from-enum-in-c-sharp
 					res = $"a{y}";
 					break;
 
@@ -112,9 +119,12 @@ namespace Chess
 	class Tile
 	{
 		public Color TileColor { get; set; }
+		public int ID { get; set; }
+		public Piece Piece { get; set; }
 
-		public Tile(Color tileColor)
+		public Tile(int ID, Color tileColor)
 		{
+			this.ID = ID;
 			this.TileColor = tileColor;
 		}
 	}
@@ -130,12 +140,15 @@ namespace Chess
 
 		public void CreateBoard() // also serves as a board "reset"
 		{
+			int cnt = 0;
 			bool ticker = false;
-			for (int i = 0; i < 8; i++)
+
+			for (int i = 0; i < 8; i++) // y
 			{
-				for (int j = 0; j < 8; j++)
+				for (int j = 0; j < 8; j++) // x
 				{
-					board[i, j] = new Tile(ticker ? Color.White : Color.Black);
+					cnt++;
+					board[i, j] = new Tile(cnt, ticker ? Color.White : Color.Black);
 					ticker = !ticker;
 				}
 			}
@@ -144,27 +157,48 @@ namespace Chess
 		public void DisplayBoard()
 		{
 			int num = 0;
-			for (int i = 0; i < 8; i++)
+
+			for (int i = 0; i < 8; i++) // y
 			{
-				for (int j = 0; j < 8; j++)
+				for (int j = 0; j < 8; j++) // x 
 				{
 					Console.WriteLine(board[i, j].TileColor + " " + (i + 1) + " " + (j + 1));
 					num++;
 				}
 			}
-			Console.WriteLine(num);
+			Console.WriteLine($"{num} tiles created.");
 
 		}
+
+		public Coords FindCoordsOfID(int ID)
+        {
+			Coords pos = new Coords();
+
+			for (int i = 0; i < 8; i++) // y
+            {
+				for (int j = 0; j < 8; j++) // x
+                {
+					if (board[i, j].ID == ID)
+                    {
+						pos = new Coords(j + 1, i + 1); // one offset because arrays start at 0
+					}
+				}
+            }
+
+			return pos;
+        }
 	}
 
 	class Piece
 	{
 		private bool initialMove = false;
+		public Owner Owner { get; }
 
 		public PieceType Type { get; set; }
 
-		public Piece(PieceType Type)
+		public Piece(Owner Owner, PieceType Type)
 		{
+			this.Owner = Owner;
 			this.Type = Type;
 		}
 	}
