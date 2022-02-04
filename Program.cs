@@ -13,20 +13,25 @@ namespace Chess
             Chess.Board b = new Chess.Board();
 
             b.DisplayBoard();
+            b.DisplayPieces();
 
             Console.WriteLine(Coords.ToChessNotation(3, 3));
 
             Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
+
+            Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
+
+            //b.MovePiece(6, )
         }
     }
 
     enum PieceType
     {
-        King,
-        Queen,
         Rook,
-        Bishop,
         Knight,
+        Bishop,
+        Queen,
+        King,
         Pawn
     }
 
@@ -120,15 +125,20 @@ namespace Chess
     {
         public Color TileColor { get; set; }
         public int ID { get; set; }
-        public Piece Piece { get; set; }
+        public Piece? Piece { get; set; }
+        public Coords Coords { get; set; }
 
-        public Tile(int ID, Color tileColor)
+        public Tile(int ID, Color TileColor, Coords Coords)
         {
             this.ID = ID;
-            this.TileColor = tileColor;
+            this.TileColor = TileColor;
+            this.Coords = Coords;
         }
     }
 
+    /// <summary>
+    /// Remember! Board is 0-7, not 1-8, account for the offset.
+    /// </summary>
     class Board
     {
         private Tile[,] board = new Tile[8, 8];
@@ -136,6 +146,7 @@ namespace Chess
         public Board()
         {
             CreateBoard();
+            PlacePieces();
         }
 
         public void CreateBoard() // also serves as a board "reset"
@@ -143,12 +154,12 @@ namespace Chess
             int cnt = 0;
             bool ticker = false;
 
-            for (int i = 0; i < 8; i++) // y
+            for (int y = 0; y < 8; y++) // y
             {
-                for (int j = 0; j < 8; j++) // x
+                for (int x = 0; x < 8; x++) // x
                 {
                     cnt++;
-                    board[i, j] = new Tile(cnt, ticker ? Color.White : Color.Black);
+                    board[y, x] = new Tile(cnt, ticker ? Color.White : Color.Black, new Coords(x, y));
                     ticker = !ticker;
                 }
             }
@@ -158,11 +169,11 @@ namespace Chess
         {
             int num = 0;
 
-            for (int i = 0; i < 8; i++) // y
+            for (int y = 0; y < 8; y++) // y
             {
-                for (int j = 0; j < 8; j++) // x 
+                for (int x = 0; x < 8; x++) // x 
                 {
-                    Console.WriteLine(board[i, j].TileColor + " " + (i + 1) + " " + (j + 1));
+                    Console.WriteLine($"{board[y, x].TileColor} {board[y, x].ID} {y + 1} {x + 1} {board[y, x].Piece}");
                     num++;
                 }
             }
@@ -170,22 +181,167 @@ namespace Chess
 
         }
 
-        public Coords FindCoordsOfID(int ID)
+        public void PlacePieces()
+        {
+            // this could probably be put into one loop
+
+
+            // black set
+            for (int y = 0; y < 2; y++) // two iterations, one for each row
+            {
+                for (int x = 0; x < 8; x++) // 8 iterations, one for each column
+                {
+                    board[y, x].Piece = new Piece(new Coords(x, y), Owner.Black, DeterminePieceType(x, y, Owner.Black));
+                }
+            }
+
+            // white set
+            for (int y = 6; y < 8; y++) // two iterations, one for each row
+            {
+                for (int x = 0; x < 8; x++) // 8 iterations, one for each column
+                {
+                    board[y, x].Piece = new Piece(new Coords(x, y), Owner.White, DeterminePieceType(x, y, Owner.White));
+                }
+            }
+
+        }
+
+        public void DisplayPieces()
+        {
+            for (int y = 0; y < 8; y++) // y
+            {
+                for (int x = 0; x < 8; x++) // x 
+                {
+                    Console.WriteLine($"{((board[y, x].Piece == null) ? "Empty" : board[y, x].Piece.Type)}");
+                }
+            }
+        }
+
+        public PieceType DeterminePieceType(int x, int y, Owner owner) // this is horrible, but I think it works, I couldn't think of an algorithmically decent way to do this
+        {
+            PieceType res;
+
+            switch (owner)
+            {
+                case Owner.Black:
+                    switch (y)
+                    {
+                        case 0:
+                            if (x == 0 || (x % 7 == 0))
+                                res = PieceType.Rook;
+                            else if (x == 1 || (x % 6 == 0))
+                                res = PieceType.Knight;
+                            else if (x == 2 || (x % 5 == 0))
+                                res = PieceType.Bishop;
+                            else if (x == 3)
+                                res = PieceType.Queen;
+                            else
+                                res = PieceType.King;
+                            break;
+
+                        case 1:
+                            res = PieceType.Pawn;
+                            break;
+
+                        default:
+                            res = PieceType.Pawn;
+                            break;
+
+                    }
+
+                    break;
+
+                case Owner.White:
+                    switch (y)
+                    {
+                        case 7:
+                            if (x == 0 || (x % 7 == 0))
+                                res = PieceType.Rook;
+                            else if (x == 1 || (x % 6 == 0))
+                                res = PieceType.Knight;
+                            else if (x == 2 || (x % 5 == 0))
+                                res = PieceType.Bishop;
+                            else if (x == 3)
+                                res = PieceType.Queen;
+                            else
+                                res = PieceType.King;
+                            break;
+
+                        case 6:
+                            res = PieceType.Pawn;
+                            break;
+
+                        default:
+                            res = PieceType.Pawn;
+                            break;
+
+                    }
+                    break;
+
+                default:
+                    res = PieceType.Pawn;
+                    break;
+            }
+
+            return res;
+        }
+
+        public Coords FindCoordsOfID(int ID) // probably won't be very useful
         {
             Coords pos = new Coords();
 
-            for (int i = 0; i < 8; i++) // y
+            for (int y = 0; y < 8; y++) // y
             {
-                for (int j = 0; j < 8; j++) // x
+                for (int x = 0; x < 8; x++) // x
                 {
-                    if (board[i, j].ID == ID)
+                    if (board[y, x].ID == ID)
                     {
-                        pos = new Coords(j + 1, i + 1); // one offset because arrays start at 0
+                        pos = new Coords(x, y); 
                     }
                 }
             }
 
             return pos;
+        }
+
+        public Tile FindTileOfCoords(Coords coords)
+        {
+            Tile res = board[0, 0]; // fixes error, unnecessary 
+
+            for (int y = 0; y < 8; y++) // y
+            {
+                for (int x = 0; x < 8; x++) // x
+                {
+                    if (board[y, x].Coords.X == coords.X && board[y, x].Coords.Y == coords.Y) // get around comparing objects, probs a better way but my brain hurts enough. https://stackoverflow.com/a/26349452 maybe?
+                    {
+                        res = board[y, x];
+                        Console.WriteLine($"success {x} and {y}");
+                        return res;
+                    }
+                    else
+                    {
+                        res = board[0, 0]; // return 0, 0 if cannot find coords
+                        //Console.WriteLine($"hit default {x} and {y}");
+                    }
+                }
+            }
+
+            return res;
+        }
+
+        /// <summary>
+        /// Method solely moves piece, does not do checking, should be handled elsewhere...
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="destination"></param>
+        public void MovePiece(Coords start, Coords destination)
+        {
+            Tile startingPoint = FindTileOfCoords(start);
+            Tile finalPoint = FindTileOfCoords(destination);
+
+
+            finalPoint.Piece = startingPoint.Piece; // re-assign pos
+            startingPoint.Piece = null; // empty pos
         }
     }
 
@@ -193,11 +349,13 @@ namespace Chess
     {
         private bool initialMove = false;
         public Owner Owner { get; }
+        public Coords Home { get; }
 
         public PieceType Type { get; set; }
 
-        public Piece(Owner Owner, PieceType Type)
+        public Piece(Coords Home, Owner Owner, PieceType Type)
         {
+            this.Home = Home;
             this.Owner = Owner;
             this.Type = Type;
         }
