@@ -21,7 +21,8 @@ namespace Chess
 
             Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
 
-            //b.MovePiece(6, )
+            b.MovePiece(new Coords(6, 1), new Coords(5, 1));
+            b.DisplayPieces();
         }
     }
 
@@ -125,7 +126,7 @@ namespace Chess
     {
         public Color TileColor { get; set; }
         public int ID { get; set; }
-        public Piece? Piece { get; set; }
+        public Piece Piece { get; set; }
         public Coords Coords { get; set; }
 
         public Tile(int ID, Color TileColor, Coords Coords)
@@ -212,7 +213,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // x 
                 {
-                    Console.WriteLine($"{((board[y, x].Piece == null) ? "Empty" : board[y, x].Piece.Type)}");
+                    Console.WriteLine($"{((board[y, x].Piece == null) ? "Empty" : board[y, x].Piece.Type)} with POS: {board[y, x].Coords}");
                 }
             }
         }
