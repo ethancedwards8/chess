@@ -15,14 +15,14 @@ namespace Chess
             b.DisplayBoard();
             b.DisplayPieces();
 
-            Console.WriteLine(Coords.ToChessNotation(3, 3));
+            //Console.WriteLine(Coords.ToChessNotation(3, 3));
 
             Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
 
-            Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
+            //Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
 
-            b.MovePiece(new Coords(6, 1), new Coords(5, 2));
-            b.DisplayPieces();
+            //b.MovePiece(new Coords(6, 1), new Coords(5, 2));
+            //b.DisplayPieces();
         }
     }
 
@@ -47,14 +47,14 @@ namespace Chess
 
     enum ChessNotation
     {
-        A = 1,
-        B, // 2
-        C, // 3
-        D, // 4
-        E, // 5
-        F, // 6
-        G, // 7
-        H  // 8
+        A = 0,
+        B, // 1
+        C, // 2
+        D, // 3
+        E, // 4
+        F, // 5
+        G, // 6
+        H  // 7
     }
 
     enum Owner
@@ -138,7 +138,7 @@ namespace Chess
     }
 
     /// <summary>
-    /// Remember! Board is 0-7, not 1-8, account for the offset.
+    /// Remember! Board is 0-7, not 1-8, remember the offset.
     /// </summary>
     class Board
     {
@@ -160,7 +160,7 @@ namespace Chess
                 for (int x = 0; x < 8; x++) // x
                 {
                     cnt++;
-                    board[y, x] = new Tile(cnt, ticker ? Color.White : Color.Black, new Coords(x, y));
+                    board[x, y] = new Tile(cnt, ticker ? Color.White : Color.Black, new Coords(x, y));
                     ticker = !ticker;
                 }
             }
@@ -174,7 +174,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // x 
                 {
-                    Console.WriteLine($"{board[y, x].TileColor} {board[y, x].ID} {y + 1} {x + 1} {board[y, x].Piece}");
+                    Console.WriteLine($"{board[x, y].TileColor} ID: {board[x, y].ID} Coords: {x} {y} Piece: {board[x, y].Piece}");
                     num++;
                 }
             }
@@ -192,7 +192,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // 8 iterations, one for each column
                 {
-                    board[y, x].Piece = new Piece(new Coords(x, y), Owner.Black, DeterminePieceType(x, y, Owner.Black));
+                    board[x, y].Piece = new Piece(new Coords(x, y), Owner.Black, DeterminePieceType(x, y, Owner.Black));
                 }
             }
 
@@ -201,7 +201,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // 8 iterations, one for each column
                 {
-                    board[y, x].Piece = new Piece(new Coords(x, y), Owner.White, DeterminePieceType(x, y, Owner.White));
+                    board[x, y].Piece = new Piece(new Coords(x, y), Owner.White, DeterminePieceType(x, y, Owner.White));
                 }
             }
 
@@ -213,7 +213,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // x 
                 {
-                    Console.WriteLine($"{((board[y, x].Piece == null) ? "Empty" : board[y, x].Piece.Type)} with POS: {board[y, x].Coords}");
+                    Console.WriteLine($"{((board[x, y].Piece == null) ? "Empty" : board[x, y].Piece.Type)} with POS: {board[x, y].Coords}");
                 }
             }
         }
@@ -295,7 +295,7 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // x
                 {
-                    if (board[y, x].ID == ID)
+                    if (board[x, y].ID == ID)
                     {
                         pos = new Coords(x, y); 
                     }
@@ -313,9 +313,9 @@ namespace Chess
             {
                 for (int x = 0; x < 8; x++) // x
                 {
-                    if (board[y, x].Coords.X == coords.X && board[y, x].Coords.Y == coords.Y) // get around comparing objects, probs a better way but my brain hurts enough. https://stackoverflow.com/a/26349452 maybe?
+                    if (board[x, y].Coords.X == coords.X && board[x, y].Coords.Y == coords.Y) // get around comparing objects, probs a better way but my brain hurts enough. https://stackoverflow.com/a/26349452 maybe?
                     {
-                        res = board[y, x];
+                        res = board[x, y];
                         Console.WriteLine($"success {x} and {y}");
                         return res;
                     }
