@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-
+using System.Text.Json;
 
 namespace Chess
 {
@@ -21,7 +21,7 @@ namespace Chess
 
             Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
 
-            b.MovePiece(new Coords(6, 1), new Coords(5, 1));
+            b.MovePiece(new Coords(6, 1), new Coords(5, 2));
             b.DisplayPieces();
         }
     }
@@ -340,17 +340,19 @@ namespace Chess
             Tile startingPoint = FindTileOfCoords(start);
             Tile finalPoint = FindTileOfCoords(destination);
 
+            Piece test = startingPoint.Piece.DeepCopy(startingPoint.Piece);
+            
 
-            finalPoint.Piece = startingPoint.Piece; // re-assign pos
+            finalPoint.Piece = test; // re-assign pos
+            Console.WriteLine(finalPoint.Coords);
             startingPoint.Piece = null; // empty pos
         }
     }
 
     class Piece
     {
-        private bool initialMove = false;
         public Owner Owner { get; }
-        public Coords Home { get; }
+        public Coords Home { get; } // original location of piece
 
         public PieceType Type { get; set; }
 
@@ -359,6 +361,22 @@ namespace Chess
             this.Home = Home;
             this.Owner = Owner;
             this.Type = Type;
+        }
+
+        // https://docs.microsoft.com/en-us/dotnet/api/system.object.memberwiseclone?redirectedfrom=MSDN&view=net-6.0#System_Object_MemberwiseClone  DeepCopy!!!
+        /// <summary>
+        /// Perform deep copy of object
+        /// </summary>
+        /// <returns>The copied object</returns>
+        public Piece DeepCopy(Piece source) // https://stackoverflow.com/a/58294305
+        {
+            var json = JsonSerializer.Serialize(source);
+
+            Console.WriteLine(json);
+
+            Piece output = (Piece)JsonSerializer.Deserialize<Piece>(json);
+
+            return output; // https://stackoverflow.com/a/58294305
         }
     }
 
