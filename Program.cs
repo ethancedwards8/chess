@@ -15,14 +15,15 @@ namespace Chess
             b.DisplayBoard();
             b.DisplayPieces();
 
-            //Console.WriteLine(Coords.ToChessNotation(3, 3));
+            Console.WriteLine(Coords.ToChessNotation(3, 3));
 
             Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
 
-            //Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
+            Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
 
-            //b.MovePiece(new Coords(6, 1), new Coords(5, 2));
-            //b.DisplayPieces();
+            b.MovePiece(new Coords(0, 1), new Coords(0, 3));
+            b.DisplayPieces();
+            b.DisplayTable();
         }
     }
 
@@ -33,7 +34,8 @@ namespace Chess
         Bishop,
         Queen,
         King,
-        Pawn
+        Pawn,
+        Empty
     }
 
     enum MovementType
@@ -60,7 +62,8 @@ namespace Chess
     enum Owner
     {
         White,
-        Black
+        Black,
+        Empty
     }
 
     public class Coords
@@ -134,6 +137,7 @@ namespace Chess
             this.ID = ID;
             this.TileColor = TileColor;
             this.Coords = Coords;
+            this.Piece = new Piece(new Coords(-1, -1), Owner.Empty);
         }
     }
 
@@ -316,7 +320,7 @@ namespace Chess
                     if (board[x, y].Coords.X == coords.X && board[x, y].Coords.Y == coords.Y) // get around comparing objects, probs a better way but my brain hurts enough. https://stackoverflow.com/a/26349452 maybe?
                     {
                         res = board[x, y];
-                        Console.WriteLine($"success {x} and {y}");
+                        //Console.WriteLine($"success {x} and {y}");
                         return res;
                     }
                     else
@@ -345,7 +349,64 @@ namespace Chess
 
             finalPoint.Piece = test; // re-assign pos
             Console.WriteLine(finalPoint.Coords);
-            startingPoint.Piece = null; // empty pos
+            startingPoint.Piece = new Piece(new Coords(-1, -1), Owner.Empty); // empty pos
+        }
+
+        public void DisplayTable()
+        {
+            for (int y = 7; y >= 0; y--) // going backwards because we're working top-down
+            {
+                //Console.WriteLine(y);
+                for (int x = 0; x < 8; x++)
+                {
+                    //Console.Write($"X: {x} Y: {y}");
+                    Console.Write($"|{GetPieceShorthand(new Coords(x, y))}|");
+                }
+                Console.WriteLine();
+            }
+        }
+
+        public string GetPieceShorthand(Coords coords)
+        {
+            string res;
+
+            switch (board[coords.X, coords.Y].Piece.Type)
+            {
+                case PieceType.Rook:
+                    res = "R";
+                    break;
+
+                case PieceType.Knight:
+                    res = "K";
+                    break;
+
+                case PieceType.Bishop:
+                    res = "B";
+                    break;
+
+                case PieceType.Queen:
+                    res = "Q";
+                    break;
+
+                case PieceType.King:
+                    res = "X";
+                    break;
+
+                case PieceType.Pawn:
+                    res = "P";
+                    break;
+
+                case PieceType.Empty:
+                    res = "O";
+                    break;
+
+                default:
+                    res = "O";
+                    break;
+
+            }
+
+            return res;
         }
     }
 
@@ -354,9 +415,10 @@ namespace Chess
         public Owner Owner { get; }
         public Coords Home { get; } // original location of piece
 
-        public PieceType Type { get; set; }
+        private PieceType type = PieceType.Empty;
+        public PieceType Type { get { return this.type; } set { this.type = value; } }
 
-        public Piece(Coords Home, Owner Owner, PieceType Type)
+        public Piece(Coords Home, Owner Owner, PieceType Type = PieceType.Empty)
         {
             this.Home = Home;
             this.Owner = Owner;
