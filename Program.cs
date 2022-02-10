@@ -9,20 +9,21 @@ namespace Chess
     {
         static void Main(string[] args)
         {
-
+            Console.BackgroundColor = ConsoleColor.Blue;
             Chess.Board b = new Chess.Board();
 
-            b.DisplayBoard();
-            b.DisplayPieces();
+            //b.DisplayBoard();
+            //b.DisplayPieces();
 
-            Console.WriteLine(Coords.ToChessNotation(3, 3));
+            Console.WriteLine($"The chess notation of 3, 3 is: {Coords.ToChessNotation(3, 3)}");
 
             Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
 
-            Console.WriteLine(b.FindTileOfCoords(new Coords(7, 7)).ID);
+            Console.WriteLine($"The tile ID of 7,7 is: {b.FindTileOfCoords(new Coords(7, 7)).ID}");
 
             b.MovePiece(new Coords(0, 1), new Coords(0, 3));
-            b.DisplayPieces();
+            b.MovePiece(new Coords(7, 1), new Coords(7, 3));
+            //b.DisplayPieces();
             b.DisplayTable();
         }
     }
@@ -127,12 +128,12 @@ namespace Chess
 
     class Tile
     {
-        public Color TileColor { get; set; }
+        public ConsoleColor TileColor { get; set; }
         public int ID { get; set; }
         public Piece Piece { get; set; }
         public Coords Coords { get; set; }
 
-        public Tile(int ID, Color TileColor, Coords Coords)
+        public Tile(int ID, ConsoleColor TileColor, Coords Coords)
         {
             this.ID = ID;
             this.TileColor = TileColor;
@@ -157,15 +158,13 @@ namespace Chess
         public void CreateBoard() // also serves as a board "reset"
         {
             int cnt = 0;
-            bool ticker = false;
 
             for (int y = 0; y < 8; y++) // y
             {
                 for (int x = 0; x < 8; x++) // x
                 {
                     cnt++;
-                    board[x, y] = new Tile(cnt, ticker ? Color.White : Color.Black, new Coords(x, y));
-                    ticker = !ticker;
+                    board[x, y] = new Tile(cnt, ((x + y) % 2 == 0) ? ConsoleColor.Black : ConsoleColor.White, new Coords(x, y));
                 }
             }
         }
@@ -354,16 +353,20 @@ namespace Chess
 
         public void DisplayTable()
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             for (int y = 7; y >= 0; y--) // going backwards because we're working top-down
             {
                 //Console.WriteLine(y);
                 for (int x = 0; x < 8; x++)
                 {
                     //Console.Write($"X: {x} Y: {y}");
+                    Console.BackgroundColor = FindTileOfCoords(new Coords(x, y)).TileColor;
                     Console.Write($"|{GetPieceShorthand(new Coords(x, y))}|");
+                    Console.BackgroundColor = ConsoleColor.Blue;
                 }
                 Console.WriteLine();
             }
+            Console.BackgroundColor = ConsoleColor.Blue;
         }
 
         public string GetPieceShorthand(Coords coords)
@@ -434,7 +437,7 @@ namespace Chess
         {
             var json = JsonSerializer.Serialize(source);
 
-            Console.WriteLine(json);
+            //Console.WriteLine(json);
 
             Piece output = (Piece)JsonSerializer.Deserialize<Piece>(json);
 
