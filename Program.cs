@@ -15,16 +15,21 @@ namespace Chess
             //b.DisplayBoard();
             //b.DisplayPieces();
 
-            Console.WriteLine($"The chess notation of 3, 3 is: {Coords.ToChessNotation(3, 3)}");
+            Console.WriteLine($"The chess notation of 3, 3 is: {Coords.ToChessNotation(new Coords(3, 3))}");
+            Console.WriteLine($"The coords of {Coords.ToChessNotation(new Coords(3, 3))} is: {Coords.ToCoords("d3")}");
 
-            Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
 
-            Console.WriteLine($"The tile ID of 7,7 is: {b.FindTileOfCoords(new Coords(7, 7)).ID}");
+            //Console.WriteLine($"The coords of tile 36 are {b.FindCoordsOfID(36)}");
+
+            //Console.WriteLine($"The tile ID of 7,7 is: {b.FindTileOfCoords(new Coords(7, 7)).ID}");
 
             b.MovePiece(new Coords(0, 1), new Coords(0, 3));
             b.MovePiece(new Coords(7, 1), new Coords(7, 3));
             //b.DisplayPieces();
+            b.MovePiece(Coords.ToCoords("c2"), Coords.ToCoords("c4"));
             b.DisplayTable();
+
+            
         }
     }
 
@@ -79,46 +84,93 @@ namespace Chess
         }
 
         public override string ToString() => $"{X}, {Y}"; // https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/struct
-        public static string ToChessNotation(int x, int y)
+        public static string ToChessNotation(Coords coords)
         {
             string res;
-
-            switch (x)
+            switch (coords.X)
             {
                 case (int)ChessNotation.A: // https://stackoverflow.com/questions/943398/get-int-value-from-enum-in-c-sharp
-                    res = $"a{y}";
+                    res = $"a{coords.Y}";
                     break;
 
                 case (int)ChessNotation.B:
-                    res = $"b{y}";
+                    res = $"b{coords.Y}";
                     break;
 
                 case (int)ChessNotation.C:
-                    res = $"c{y}";
+                    res = $"c{coords.Y}";
                     break;
 
                 case (int)ChessNotation.D:
-                    res = $"d{y}";
+                    res = $"d{coords.Y}";
                     break;
 
                 case (int)ChessNotation.E:
-                    res = $"e{y}";
+                    res = $"e{coords.Y}";
                     break;
 
                 case (int)ChessNotation.F:
-                    res = $"f{y}";
+                    res = $"f{coords.Y}";
                     break;
 
                 case (int)ChessNotation.G:
-                    res = $"g{y}";
+                    res = $"g{coords.Y}";
                     break;
 
                 case (int)ChessNotation.H:
-                    res = $"h{y}";
+                    res = $"h{coords.Y}";
                     break;
 
                 default:
                     return "err";
+                    break;
+            }
+
+            return res;
+        }
+        
+        public static Coords ToCoords(string notation)
+        {
+            Coords res = new Coords();
+            int y = (int)Char.GetNumericValue(notation[1]) - 1; // -1 for the offset
+
+            switch (notation[0])
+            {
+                case 'a':
+                    res = new Coords(0, y);
+                    break;
+
+                case 'b':
+                    res = new Coords(1, y);
+                    break;
+
+                case 'c':
+                    res = new Coords(2, y);
+                    break;
+
+                case 'd':
+                    res = new Coords(3, y);
+                    break;
+
+                case 'e':
+                    res = new Coords(4, y);
+                    break;
+
+                case 'f':
+                    res = new Coords(5, y);
+                    break;
+
+                case 'g':
+                    res = new Coords(6, y);
+                    break;
+
+                case 'h':
+                    res = new Coords(7, y);
+                    break;
+
+                default:
+                    res = new Coords(-1, -1);
+                    Console.WriteLine("error, please enter valid chess notation");
                     break;
             }
 
@@ -158,7 +210,6 @@ namespace Chess
         public void CreateBoard() // also serves as a board "reset"
         {
             int cnt = 0;
-
             for (int y = 0; y < 8; y++) // y
             {
                 for (int x = 0; x < 8; x++) // x
@@ -347,15 +398,18 @@ namespace Chess
             
 
             finalPoint.Piece = test; // re-assign pos
-            Console.WriteLine(finalPoint.Coords);
+            //Console.WriteLine(finalPoint.Coords);
             startingPoint.Piece = new Piece(new Coords(-1, -1), Owner.Empty); // empty pos
         }
 
         public void DisplayTable()
         {
+            // TODO: need to add chess notation columns
             Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("| ||0||1||2||3||4||5||6||7|");
             for (int y = 7; y >= 0; y--) // going backwards because we're working top-down
             {
+                Console.Write($"|{y}|");
                 //Console.WriteLine(y);
                 for (int x = 0; x < 8; x++)
                 {
@@ -411,6 +465,7 @@ namespace Chess
 
             return res;
         }
+
     }
 
     class Piece
